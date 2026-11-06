@@ -2,23 +2,24 @@ import streamlit as st
 from transformers import pipeline
 import pandas as pd
 import plotly.express as px
-import spacy
+import re
 
 st.set_page_config(page_title="Análisis Granular de Sentimientos", page_icon="📊", layout="wide")
 st.title("📊 Análisis Granular de Sentimientos por Oración")
 st.markdown("Esta aplicación desglosa textos complejos, identifica el sentimiento de cada oración y evalúa el nivel de confianza del modelo.")
 
 @st.cache_resource
-def load_spacy():
-    return spacy.load("es_core_news_sm")
-
-@st.cache_resource
 def load_transformer():
     return pipeline("sentiment-analysis", model="pysentimiento/robertuito-sentiment-analysis")
 
-with st.spinner("Cargando modelos de IA..."):
-    nlp = load_spacy()
+with st.spinner("Cargando modelo de IA..."):
     analizador = load_transformer()
+
+def segmentar_oraciones(texto_input):
+    # Separa por punto, signo de exclamación o interrogación seguidos de espacio o fin de línea
+    patron = r'(?<=[.!?])\s+'
+    oraciones_raw = re.split(patron, texto_input.strip())
+    return [o.strip() for o in oraciones_raw if o.strip()]
 
 texto_defecto = (
     "La atención al cliente fue excelente y respondieron todas mis dudas al instante. "
@@ -35,8 +36,7 @@ texto = st.text_area("Ingresa un párrafo o comentario compuesto:", texto_defect
 
 if st.button("Analizar Sentimientos"):
     if texto.strip():
-        doc = nlp(texto)
-        oraciones = [sent.text.strip() for sent in doc.sents if sent.text.strip()]
+        oraciones = segmentar_oraciones(texto)
         
         if not oraciones:
             st.warning("No se detectaron oraciones válidas.")
