@@ -3,7 +3,6 @@ from transformers import pipeline
 import pandas as pd
 import plotly.express as px
 import spacy
-import os
 
 st.set_page_config(page_title="Análisis Granular de Sentimientos", page_icon="📊", layout="wide")
 st.title("📊 Análisis Granular de Sentimientos por Oración")
@@ -11,11 +10,7 @@ st.markdown("Esta aplicación desglosa textos complejos, identifica el sentimien
 
 @st.cache_resource
 def load_spacy():
-    try:
-        return spacy.load("es_core_news_sm")
-    except OSError:
-        os.system("python -m spacy download es_core_news_sm")
-        return spacy.load("es_core_news_sm")
+    return spacy.load("es_core_news_sm")
 
 @st.cache_resource
 def load_transformer():
